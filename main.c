@@ -14,82 +14,7 @@
 #define MYPORT "4950"
 #define BACKLOG 5
 
-struct Queue
-{
-    int front, rear, size;
-    unsigned capacity;
-    char **array;
-};
 
-struct Queue *createQueue(unsigned capacity)
-{
-    struct Queue *queue = (struct Queue *)malloc(sizeof(struct Queue));
-    queue->capacity = capacity;
-    queue->front = queue->size = 0;
-
-    queue->rear = capacity - 1;
-    queue->array = (char **)malloc(queue->capacity * sizeof(char **));
-    return queue;
-}
-
-int isFull(struct Queue *queue)
-{
-    return (queue->size == queue->capacity);
-}
-
-int isEmpty(struct Queue *queue)
-{
-    return (queue->size == 0);
-}
-
-void enqueue(struct Queue *queue, char *item)
-{
-    if (isFull(queue))
-    {
-        return;
-    }
-    queue->rear = (queue->rear + 1) % queue->capacity;
-    queue->array[queue->rear] = (char *)malloc((strlen(item) + 1) * sizeof(char));
-    ;
-    queue->size = queue->size + 1;
-    strcpy(queue->array[queue->rear], item);
-}
-
-char *dequeue(struct Queue *queue)
-{
-    if (isEmpty(queue))
-    {
-        return "";
-    }
-    char *item = queue->array[queue->front];
-    queue->front = (queue->front + 1) % queue->capacity;
-    queue->size = queue->size - 1;
-    return item;
-}
-
-// Function to get front of queue
-char *front(struct Queue *queue)
-{
-    if (isEmpty(queue))
-        return "";
-    return queue->array[queue->front];
-}
-
-// Function to get rear of queue
-char *rear(struct Queue *queue)
-{
-    if (isEmpty(queue))
-        return "";
-    return queue->array[queue->rear];
-}
-
-void removeAllElements(struct Queue *queue)
-{
-    while (isEmpty(queue) == 0)
-    {
-        dequeue(queue);
-    }
-}
 
 int create_socket(struct addrinfo hints, struct addrinfo *servinfo, struct addrinfo *p)
 {
@@ -246,6 +171,8 @@ int not_in_closed_channels(int *closed_channels, int fd)
 
 int main(int argc, char *argv[])
 {
+                fprintf(stderr, "started");
+
     struct state
     {
         int id;
@@ -368,7 +295,7 @@ int main(int argc, char *argv[])
     FD_SET(listen_fd, &master); // add listener to the master set
     fdmax = listen_fd;          // keep track of the biggest file descriptor
     fprintf(stderr, "{id: %d, state: %d, predecessor: %d, successor: %d}\n", ss.id, ss.state_counter, ss.predecessor, ss.successor);
-            fprintf(stderr, "hi");
+            fprintf(stderr, "hi\n");
     int nbytes;
 
    while (1)
@@ -391,7 +318,7 @@ int main(int argc, char *argv[])
     //     }
     // }
     read_fds = master;
-        fprintf(stderr, "select start");
+        fprintf(stderr, "select start\n");
 
     if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1)
     {
@@ -399,13 +326,20 @@ int main(int argc, char *argv[])
         exit(4);
     }
 
+            fprintf(stderr, "select end\n");
+
+
     // run thru existing connections looking for data to read
     for (int i = 0; i <= fdmax; i++)
     {
         if (FD_ISSET(i, &read_fds))
         {
+            fprintf(stderr, "isset\n");
+
             if (i == listen_fd)
             {
+                fprintf(stderr, "is listen_fd\n");
+
                 // handle new connections
                 // accept from channels
                 socklen_t addr_size = sizeof their_addr;
@@ -440,7 +374,7 @@ int main(int argc, char *argv[])
                     FD_CLR(i, &master); // remove from master set
                 }
                 else {
-                fprintf(stderr, "received: %s", buf);
+                fprintf(stderr, "received: %s\n", buf);
 
                 for (int j = 0; j <= fdmax; j++)
                 {

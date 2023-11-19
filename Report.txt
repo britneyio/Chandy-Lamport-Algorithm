@@ -1,0 +1,9 @@
+My program has a state struct and based on the hostfile given, I assign
+the predecessor and successor, along with the id of the current host. I avoided
+hardcoding anything. My token application works by first creating an array of file descriptors
+from the host file and then if it has a token sending to all of the peers. Similarly if it starts with the marker
+and has met the state requirement then it will send markers to all of its peers. Then if a host receives a token, it prints a message
+and updates the state counter. If a host receives a marker, it prints a message and the current state is saved in the values array. 
+And the peer it was receieved on channel is put into the closed_channels array so that it can't be sent to or recieved from. And it continues until
+all the markers have been receieved which is confirmed by pings_received. Then everything is reset and tokens are continued to being sent, and if the state
+hits another state requirement then another snapshot begins.
